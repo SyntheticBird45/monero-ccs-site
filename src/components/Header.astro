@@ -1,0 +1,293 @@
+---
+import { Image } from "astro:assets";
+import MaskIcon from "@/components/icons/MaskIcon.astro";
+import { icons } from "@/utils/icons";
+import moneroLogo from "@/../public/meta/monerologo.avif";
+
+const navItems = [
+  { label: "Explorer", href: "/explorer" },
+  { label: "About", href: "/about" },
+  { label: "Rules", href: "/staff" },
+  { label: "Wallet", href: "/wallet" },
+];
+---
+
+<header class="header">
+  <div class="header-inner">
+    <a class="brand" href="/">
+      <Image
+        class="mark"
+        src={moneroLogo}
+        alt=""
+        aria-hidden="true"
+        width={64}
+        height={64}
+        format="avif"
+        priority
+      />
+      <span>Community Crowdfunding System</span>
+    </a>
+
+    <input id="nav-toggle" class="nav-toggle" type="checkbox" />
+
+    <nav id="primary-nav" class="nav" aria-label="Primary navigation">
+      <div class="drawer-header">
+        <label
+          for="nav-toggle"
+          class="close"
+          aria-controls="primary-nav"
+          aria-label="Close menu"
+        >
+          <MaskIcon src={icons.mask("close")} size="1.5rem" />
+        </label>
+      </div>
+      <ul class="nav-list">
+        {navItems.map(({ label, href }) => (
+          <li class="nav-item">
+            <a class="link" href={href}>{label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <label
+      for="nav-toggle"
+      class="scrim"
+      aria-hidden="true"
+      aria-label="Close menu"
+    ></label>
+
+    <div class="utils">
+      <label
+        for="nav-toggle"
+        class="hamburger"
+        aria-controls="primary-nav"
+        aria-label="Open menu"
+      >
+        <MaskIcon src={icons.mask("hamburger")} size="1.5rem" />
+      </label>
+    </div>
+  </div>
+</header>
+
+<style>
+  :root {
+    --drawer-gap: clamp(5rem, 20vw, 9rem);
+  }
+
+  .header {
+    position: sticky;
+    inset-block-start: 0;
+    background: var(--bg-color);
+    box-shadow: var(--shadow-sm);
+    z-index: var(--z-header);
+  }
+
+  .header-inner {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--paragraph-main);
+    text-decoration: none;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.02em;
+    justify-self: start;
+    padding-block: var(--space-xs);
+  }
+
+  .mark {
+    inline-size: 1.625rem;
+    block-size: 1.625rem;
+  }
+
+  .utils {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-md);
+    justify-self: end;
+  }
+
+  .hamburger,
+  .close {
+    color: var(--paragraph-main);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .hamburger {
+    font-size: var(--font-size-xl);
+  }
+
+  .nav-toggle {
+    display: none;
+  }
+
+  .nav {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-end: -100%;
+    inline-size: min(26.25rem, calc(100vw - var(--drawer-gap)));
+    box-sizing: border-box;
+    background: var(--bg-color);
+    padding: var(--space-md);
+    z-index: var(--z-modal-content);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-block: var(--space-xs);
+    background: inherit;
+    flex-shrink: 0;
+  }
+
+  .nav-list {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    margin: var(--space-md) 0 0;
+    padding: 0;
+    list-style: none;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .nav-item:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .link {
+    color: var(--paragraph-main);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    display: block;
+    padding-block: var(--space-md);
+    white-space: nowrap;
+
+    &:hover {
+      color: var(--heading-color);
+      text-decoration: none;
+    }
+  }
+
+  .scrim {
+    position: fixed;
+    inset: 0;
+    background: rgb(0 0 0 / 45%);
+    z-index: var(--z-modal-background);
+    touch-action: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .nav-toggle:checked {
+    & ~ .nav {
+      inset-inline-end: 0;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    & ~ .scrim {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  body:has(#nav-toggle:checked) {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  @media (width >= 1200px) {
+    .header-inner {
+      padding-inline: 5rem;
+    }
+  }
+
+  @media (width >= 1200px) and (hover: hover) {
+    .header {
+      position: relative;
+      background: unset;
+      box-shadow: unset;
+    }
+
+    .nav {
+      position: static;
+      inset: auto;
+      inline-size: auto;
+      padding: 0;
+      background: unset;
+      overflow: visible;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      display: block;
+    }
+
+    .link {
+      padding-block: unset;
+    }
+
+    .nav-list {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      gap: var(--space-2xl);
+      margin: 0;
+      flex: unset;
+      overflow: visible;
+    }
+
+    .nav-item:not(:last-child) {
+      border-bottom: none;
+    }
+
+    .nav-toggle:checked ~ .nav {
+      inset: unset;
+      opacity: unset;
+    }
+
+    body:has(#nav-toggle:checked) {
+      overflow: unset;
+      overscroll-behavior: unset;
+    }
+
+    .drawer-header,
+    .scrim,
+    .hamburger,
+    .utils {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav,
+    .scrim {
+      transition: none;
+    }
+  }
+</style>
