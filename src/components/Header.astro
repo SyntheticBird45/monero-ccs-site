@@ -42,11 +42,15 @@ const navItems = [
         </label>
       </div>
       <ul class="nav-list">
-        {navItems.map(({ label, href }) => (
-          <li class="nav-item">
-            <a class="link" href={href}>{label}</a>
-          </li>
-        ))}
+        {
+          navItems.map(({ label, href }) => (
+            <li class="nav-item">
+              <a class="link" {href}>
+                {label}
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </nav>
 

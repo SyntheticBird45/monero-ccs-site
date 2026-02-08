@@ -1,0 +1,7 @@
+{
+  "unstable": ["fmt-component"],
+  "fmt": {
+    "indentWidth": 2,
+    "useTabs": false
+  }
+}

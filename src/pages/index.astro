@@ -1,6 +1,223 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
+import Button from "../components/ui/Button.astro";
+import MaskIcon from "@/components/icons/MaskIcon.astro";
+import { icons } from "@/utils/icons";
 ---
 
 <Layout>
+  <div class="hero">
+    <div class="content">
+      <h1>Community Crowdfunding System</h1>
+      <p>
+        Monero is a decentralized, community driven project. The CCS is a way
+        for the community to fund development and other initiatives that benefit
+        the Monero ecosystem.
+      </p>
+      <div class="buttons">
+        <Button variant="primary" href="/explorer" class="hero-button"
+        >Explore</Button>
+        <Button variant="secondary" href="/about" class="hero-button"
+        >About</Button>
+      </div>
+    </div>
+    <div class="image">
+      <img
+        src="/assets/hero-image.avif"
+        alt="Some pretty img here"
+      />
+    </div>
+  </div>
+
+  <section data-variant="centered">
+    <h2>View Proposals</h2>
+    <div class="explore-cards">
+      <a class="card" href="/explorer/ideas">
+        <span class="icon">
+          <MaskIcon src={icons.mask("lightbulb")} size="2.5em" />
+        </span>
+        <h3>Ideas</h3>
+        <p>
+          If you have an idea for a feature, task, or service, this is the place
+          to pitch it for discussion.
+        </p>
+      </a>
+
+      <a class="card" href="/explorer/funding">
+        <span class="icon">
+          <MaskIcon src={icons.mask("hand-coins")} size="2.5em" />
+        </span>
+        <h3>Funding Required</h3>
+        <p>
+          Once a pitched idea has been approved, it goes here for community
+          fundraising.
+        </p>
+      </a>
+
+      <a class="card" href="/explorer/wip">
+        <span class="icon">
+          <MaskIcon src={icons.mask("cog")} size="2.5em" />
+        </span>
+        <h3>Work in Progress</h3>
+        <p>
+          Approved ideas that have been picked up and successfully funded are
+          moved here so their progress can be monitored.
+        </p>
+      </a>
+
+      <a class="card" href="/explorer/completed">
+        <span class="icon">
+          <MaskIcon src={icons.mask("package")} size="2.5em" />
+        </span>
+        <h3>Completed</h3>
+        <p>
+          Once an item has been completed, all milestones met, and all funds
+          paid out, the thread moves here.
+        </p>
+      </a>
+    </div>
+  </section>
+
+  <section data-variant="centered">
+    <h2>Latest Updates</h2>
+  </section>
 </Layout>
+
+<style>
+  h1 {
+    font-size: var(--font-size-3xl);
+    color: var(--monero-orange);
+    margin-bottom: 0;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: var(--space-2xl);
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+
+      p {
+        font-size: var(--font-size-lg);
+        color: var(--paragraph-subtitle);
+        line-height: var(--line-height-body);
+        max-width: 45ch;
+      }
+    }
+
+    .buttons {
+      display: flex;
+      gap: var(--space-md);
+
+      & .hero-button {
+        padding: 1em 2em;
+      }
+    }
+  }
+
+  section[data-variant="centered"] {
+    text-align: center;
+    max-width: 65ch;
+    margin: 0 auto;
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: var(--space-xl);
+    }
+  }
+
+  .explore-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+    align-items: stretch;
+  }
+
+  .explore-cards .card {
+    background: var(--card-color);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    overflow: hidden;
+    position: relative;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+
+    & > h3 {
+      margin: 0;
+      font-size: var(--font-size-lg);
+      color: var(--heading-color);
+    }
+
+    & > p {
+      margin: 0;
+      color: var(--paragraph-subtitle);
+      line-height: var(--line-height-body);
+    }
+
+    & .icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-full);
+      padding: var(--space-lg);
+      background: var(--card-hover-color);
+      width: fit-content;
+      color: white;
+    }
+
+    &:hover {
+      background: var(--card-hover-color);
+      cursor: pointer;
+    }
+
+    @media (width > 900px) {
+      &:nth-child(1):hover {
+        transform: translate(-5px, -5px);
+      }
+
+      &:nth-child(2):hover {
+        transform: translate(5px, -5px);
+      }
+
+      &:nth-child(3):hover {
+        transform: translate(-5px, 5px);
+      }
+
+      &:nth-child(4):hover {
+        transform: translate(5px, 5px);
+      }
+    }
+  }
+
+  .explore-cards .card:nth-child(1) .icon {
+    background: #e8c24f;
+  }
+
+  .explore-cards .card:nth-child(2) .icon {
+    background: #f28080;
+  }
+
+  .explore-cards .card:nth-child(3) .icon {
+    background: #498fd5;
+  }
+
+  .explore-cards .card:nth-child(4) .icon {
+    background: #70af71;
+  }
+
+  @media (width <= 900px) {
+    .explore-cards {
+      grid-template-columns: 1fr;
+      gap: var(--space-md);
+    }
+  }
+</style>
