@@ -32,7 +32,7 @@ import { icons } from "@/utils/icons";
   <section data-variant="centered">
     <h2>View Proposals</h2>
     <div class="explore-cards">
-      <a class="card" href="/explorer/ideas">
+      <a class="card" href="/explorer?status=idea">
         <span class="icon">
           <MaskIcon src={icons.mask("lightbulb")} size="2.5em" />
         </span>
@@ -43,7 +43,7 @@ import { icons } from "@/utils/icons";
         </p>
       </a>
 
-      <a class="card" href="/explorer/funding">
+      <a class="card" href="/explorer?status=funding-required">
         <span class="icon">
           <MaskIcon src={icons.mask("hand-coins")} size="2.5em" />
         </span>
@@ -54,7 +54,7 @@ import { icons } from "@/utils/icons";
         </p>
       </a>
 
-      <a class="card" href="/explorer/wip">
+      <a class="card" href="/explorer?status=work-in-progress">
         <span class="icon">
           <MaskIcon src={icons.mask("cog")} size="2.5em" />
         </span>
@@ -65,7 +65,7 @@ import { icons } from "@/utils/icons";
         </p>
       </a>
 
-      <a class="card" href="/explorer/completed">
+      <a class="card" href="/explorer?status=completed">
         <span class="icon">
           <MaskIcon src={icons.mask("package")} size="2.5em" />
         </span>
@@ -77,22 +77,18 @@ import { icons } from "@/utils/icons";
       </a>
     </div>
   </section>
-
-  <section data-variant="centered">
-    <h2>Latest Updates</h2>
-  </section>
 </Layout>
 
 <style>
   h1 {
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-4xl);
     color: var(--monero-orange);
     margin-bottom: 0;
   }
 
   .hero {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 0.5fr;
     align-items: center;
     gap: var(--space-2xl);
 
@@ -121,7 +117,6 @@ import { icons } from "@/utils/icons";
 
   section[data-variant="centered"] {
     text-align: center;
-    max-width: 65ch;
     margin: 0 auto;
 
     h2 {
@@ -135,6 +130,8 @@ import { icons } from "@/utils/icons";
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-md);
     align-items: stretch;
+    max-width: 75%;
+    margin: 0 auto;
   }
 
   .explore-cards .card {
@@ -199,19 +196,19 @@ import { icons } from "@/utils/icons";
   }
 
   .explore-cards .card:nth-child(1) .icon {
-    background: #e8c24f;
+    background: var(--status-idea-color);
   }
 
   .explore-cards .card:nth-child(2) .icon {
-    background: #f28080;
+    background: var(--status-funding-color);
   }
 
   .explore-cards .card:nth-child(3) .icon {
-    background: #498fd5;
+    background: var(--status-wip-color);
   }
 
   .explore-cards .card:nth-child(4) .icon {
-    background: #70af71;
+    background: var(--status-completed-color);
   }
 
   @media (width <= 900px) {

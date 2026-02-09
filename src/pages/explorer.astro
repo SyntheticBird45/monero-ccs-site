@@ -1,0 +1,302 @@
+---
+import Layout from "../layouts/Layout.astro";
+import MaskIcon from "@/components/icons/MaskIcon.astro";
+import BackLink from "@/components/ui/BackLink.astro";
+import { icons } from "@/utils/icons";
+import Button from "@/components/ui/Button.astro";
+import ProposalCard from "@/components/ProposalCard.astro";
+import ExplorerSearchBar from "@/components/ExplorerSearchBar.astro";
+import { sampleProposals } from "@/data/proposals";
+import {
+  checkboxFilters,
+  DEFAULT_SORT,
+  explorerUrl,
+  inferStatus,
+  normalizeCheckboxes,
+  normalizeSort,
+} from "@/utils/explorer-url";
+
+const url = new URL(Astro.request.url);
+const searchQuery = url.searchParams.get("search")?.toLowerCase() || "";
+const rawStatus = url.searchParams.get("status") || "";
+const rawSort = url.searchParams.get("sort") || DEFAULT_SORT;
+const rawCheckboxValues = Object.fromEntries(
+  checkboxFilters.map(
+    (cb) => [cb.name, url.searchParams.get(cb.name) === "1"],
+  ),
+);
+
+const statusFilter = rawStatus || inferStatus(rawSort, rawCheckboxValues);
+const sort = normalizeSort(rawSort, statusFilter);
+const checkboxValues = normalizeCheckboxes(rawCheckboxValues, statusFilter);
+const hasActiveFilters = sort !== DEFAULT_SORT ||
+  Object.values(checkboxValues).some(Boolean);
+
+// Sorting
+const sortStrategies: Record<string, (a: any, b: any) => number> = {
+  "newest": (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  "oldest": (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+  "most-funded": (a, b) => (b.amountFunded ?? 0) - (a.amountFunded ?? 0),
+  "least-funded": (a, b) => (a.amountFunded ?? 0) - (b.amountFunded ?? 0),
+};
+
+// Filtered
+const proposals = sampleProposals
+  .filter((p) => {
+    const matchesSearch = p.title.toLowerCase().includes(searchQuery);
+    const matchesStatus = !statusFilter || p.status === statusFilter;
+    const matchesFunding = !checkboxValues.notFullyFunded ||
+      (p.amountFunded ?? 0) < (p.amount ?? 0);
+    return matchesSearch && matchesStatus && matchesFunding;
+  })
+  .sort(sortStrategies[sort] || (() => 0));
+
+const categories = [
+  {
+    status: "idea",
+    icon: "lightbulb",
+    color: "var(--status-idea-color)",
+    label: "Ideas",
+  },
+  {
+    status: "funding-required",
+    icon: "hand-coins",
+    color: "var(--status-funding-color)",
+    label: "Funding Required",
+  },
+  {
+    status: "work-in-progress",
+    icon: "cog",
+    color: "var(--status-wip-color)",
+    label: "Work in Progress",
+  },
+  {
+    status: "completed",
+    icon: "package",
+    color: "var(--status-completed-color)",
+    label: "Completed",
+  },
+];
+
+const showIntro = !statusFilter && !searchQuery;
+---
+
+<Layout>
+  <div class="explorer">
+    <BackLink href="/">Home</BackLink>
+
+    <nav class="categories">
+      {
+        categories.map((cat) => (
+          <a
+            href={explorerUrl({
+              status: statusFilter === cat.status ? undefined : cat.status,
+              search: searchQuery || undefined,
+            })}
+            class:list={["category-link", { active: statusFilter === cat.status }]}
+            style={`--cat-color: ${cat.color}`}
+          >
+            <span class="cat-icon">
+              <MaskIcon src={icons.mask(cat.icon)} size="1.25em" />
+            </span>
+            {cat.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="submit-cta">
+      <Button href="/submit" variant="primary">Submit Idea</Button>
+    </div>
+
+    <div class="proposals">
+      <ExplorerSearchBar
+        {searchQuery}
+        {statusFilter}
+        {sort}
+        {checkboxValues}
+        {hasActiveFilters}
+      />
+
+      {
+        showIntro ? (
+          <div class="info-message">
+            <div class="info-image-placeholder">
+              <MaskIcon
+                src={icons.mask("search")}
+                size="3rem"
+                color="var(--monero-orange)"
+              />
+            </div>
+            <p>Select a category, or search by name to get started.</p>
+          </div>
+        ) : (
+          <>
+            {
+              searchQuery && (
+                <p class="search-results">
+                  Found {proposals.length} proposal{
+                    proposals.length !== 1 ? "s" : ""
+                  } matching "{searchQuery}"
+                </p>
+              )
+            }
+            {proposals.map((proposal) => <ProposalCard {proposal} />)}
+          </>
+        )
+      }
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .explorer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .category-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--card-color);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--heading-color);
+    text-decoration: none;
+    white-space: nowrap;
+
+    .cat-icon {
+      display: flex;
+      color: var(--cat-color);
+    }
+    &:hover {
+      background: var(--card-hover-color);
+      text-decoration: none;
+    }
+    &.active {
+      background: var(--monero-orange);
+      color: white;
+      .cat-icon {
+        color: white;
+      }
+    }
+    &.active:hover {
+      outline: 2px solid var(--monero-orange);
+      outline-offset: 2px;
+    }
+  }
+
+  .submit-cta {
+    display: none;
+  }
+
+  .proposals {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .search-results {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .info-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-4xl) var(--space-xl);
+    color: var(--text-secondary);
+  }
+
+  .info-image-placeholder {
+    width: 120px;
+    height: 120px;
+    background: var(--card-hover-color);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .info-message p {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    max-width: 400px;
+  }
+
+  @media (width >= 1200px) {
+    .explorer {
+      display: grid;
+      grid-template-columns: 20rem 1fr;
+      grid-template-rows: auto auto 1fr;
+      column-gap: var(--space-2xl);
+      row-gap: var(--space-md);
+    }
+
+    .explorer > :global(.back-link) {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .categories {
+      grid-column: 1;
+      grid-row: 2;
+      flex-direction: column;
+      overflow: visible;
+    }
+
+    .category-link {
+      gap: var(--space-md);
+      padding: var(--space-sm) var(--space-md);
+      border: 2px solid transparent;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-base);
+
+      &.active {
+        background: var(--card-hover-color);
+        color: var(--monero-orange);
+        border-color: var(--monero-orange);
+        .cat-icon {
+          color: var(--cat-color);
+        }
+      }
+
+      &.active:hover {
+        background: var(--card-hover-color);
+        outline: none;
+      }
+    }
+
+    .submit-cta {
+      grid-column: 1;
+      grid-row: 3;
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid var(--border-color);
+      padding-top: var(--space-md);
+      position: sticky;
+      top: 2rem;
+    }
+
+    .proposals {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      margin-top: var(--space-4xl);
+    }
+  }
+</style>

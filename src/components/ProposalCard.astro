@@ -1,0 +1,240 @@
+---
+import type { Proposal } from "@/data/proposals";
+
+interface Props {
+  proposal: Proposal;
+}
+
+const { proposal } = Astro.props;
+
+const statusConfig = {
+  "idea": {
+    borderColor: "var(--status-idea-color)",
+    icon: "lightbulb",
+  },
+  "funding-required": {
+    borderColor: "var(--status-funding-color)",
+    icon: "hand-coins",
+  },
+  "work-in-progress": {
+    borderColor: "var(--status-wip-color)",
+    icon: "cog",
+  },
+  "completed": {
+    borderColor: "var(--status-completed-color)",
+    icon: "package",
+  },
+} as const;
+
+const config = statusConfig[proposal.status];
+const fundingPercent = proposal.amount
+  ? Math.min(
+    Math.round(((proposal.amountFunded || 0) / proposal.amount) * 100),
+    100,
+  )
+  : 0;
+
+function formatDate(d: string) {
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return d;
+  return dt.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+import MaskIcon from "@/components/icons/MaskIcon.astro";
+import { icons } from "@/utils/icons";
+---
+
+<a
+  href={proposal.url}
+  class="proposal-card"
+  style={`--progress-color: ${config.borderColor}`}
+>
+  <div class="proposal-content">
+    <h3 class="proposal-title">{proposal.title}</h3>
+
+    <div class="proposal-meta">
+      <div class="meta-item">
+        <MaskIcon
+          src={icons.mask("user")}
+          size="1.25em"
+          color="var(--monero-orange)"
+        />
+        <span>{proposal.author}</span>
+      </div>
+      <div class="meta-item">
+        <MaskIcon
+          src={icons.mask("calendar")}
+          size="1.25em"
+          color="var(--monero-orange)"
+        />
+        <span>{formatDate(proposal.date)}</span>
+      </div>
+      {
+        proposal.contributions !== undefined && (
+          <div class="meta-item">
+            <MaskIcon
+              src={icons.mask("users")}
+              size="1.25em"
+              color="var(--monero-orange)"
+            />
+            <span>{proposal.contributions} contributors</span>
+          </div>
+        )
+      }
+      {
+        proposal.amount !== undefined && (
+          <div class="meta-item">
+            <MaskIcon
+              src={icons.mask("coins")}
+              size="1.25em"
+              color="var(--monero-orange)"
+            />
+            <span>{proposal.amount} XMR</span>
+          </div>
+        )
+      }
+    </div>
+
+    {
+      proposal.status === "funding-required" && (
+        <div class="proposal-progress">
+          <span class="progress-text"
+          >Raised {proposal.amountFunded || 0} of {proposal.amount} XMR</span>
+          <div class="progress-track">
+            <div class="progress-fill" style={`width: ${fundingPercent}%`}>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    {
+      proposal.status === "work-in-progress" && proposal.milestones &&
+  (
+        <div class="proposal-progress">
+          <span class="progress-text"
+          >Completed {proposal.milestonesCompleted || 0} of {
+              proposal.milestones
+            } milestones</span>
+          <div class="milestone-grid">
+            {
+              Array.from({ length: proposal.milestones }).map((
+                _,
+                i,
+              ) => (
+                <div
+                  class={`milestone-seg ${
+                    i < (proposal.milestonesCompleted || 0) ? "active" : ""
+                  }`}
+                />
+              ))
+            }
+          </div>
+        </div>
+      )
+    }
+  </div>
+</a>
+
+<style>
+  .proposal-card {
+    display: block;
+    background: var(--card-color);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    border-top: 6px solid var(--progress-color);
+    padding: var(--space-xl);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    margin-bottom: var(--space-md);
+  }
+
+  .proposal-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .proposal-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-md) 0;
+  }
+
+  .proposal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md) var(--space-xl);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .proposal-progress {
+    margin-top: var(--space-lg);
+  }
+
+  .progress-text {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--space-xs);
+    text-align: right;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 8px;
+    background-color: color-mix(
+      in srgb,
+      var(--progress-color),
+      transparent 85%
+    );
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background-color: var(--progress-color);
+    transition: width 0.4s ease-out;
+  }
+
+  .milestone-grid {
+    display: flex;
+    gap: 4px;
+    height: 8px;
+  }
+
+  .milestone-seg {
+    flex: 1;
+    background-color: color-mix(
+      in srgb,
+      var(--progress-color),
+      transparent 85%
+    );
+    border-radius: 10px;
+  }
+
+  .milestone-seg.active {
+    background-color: var(--progress-color);
+  }
+
+  @media (max-width: 768px) {
+    .proposal-card {
+      padding: var(--space-lg);
+    }
+    .progress-text {
+      text-align: left;
+    }
+  }
+</style>

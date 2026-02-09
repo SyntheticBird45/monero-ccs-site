@@ -1,0 +1,296 @@
+---
+import MaskIcon from "@/components/icons/MaskIcon.astro";
+import { icons } from "@/utils/icons";
+import {
+  checkboxesForStatus,
+  explorerUrl,
+  sortsForStatus,
+} from "@/utils/explorer-url";
+
+interface Props {
+  searchQuery: string;
+  statusFilter: string;
+  sort: string;
+  checkboxValues: Record<string, boolean>;
+  hasActiveFilters: boolean;
+}
+
+const { searchQuery, statusFilter, sort, checkboxValues, hasActiveFilters } =
+  Astro.props;
+
+const availableSorts = sortsForStatus(statusFilter);
+const availableCheckboxes = checkboxesForStatus(statusFilter);
+
+const clearFiltersUrl = explorerUrl({
+  status: statusFilter || undefined,
+  search: searchQuery || undefined,
+});
+const clearSearchUrl = explorerUrl({ status: statusFilter || undefined });
+---
+
+<div class="search-container">
+  <form method="GET" action="/explorer" class="search-form">
+    <div class="search-icon-wrapper">
+      <MaskIcon src={icons.mask("search")} size="1.5em" color="#5C5E67" />
+    </div>
+    <input
+      type="text"
+      name="search"
+      value={searchQuery}
+      placeholder="Search by keyword"
+      class="search-input"
+    />
+
+    <div class="utils">
+      <details class="filters">
+        <summary
+          class={`filter-toggle ${hasActiveFilters ? "has-active" : ""}`}
+          aria-label="Filters"
+        >
+          <MaskIcon
+            src={icons.mask("cog")}
+            size="1.5em"
+            color="var(--text-secondary)"
+          />
+        </summary>
+
+        <div class="filter-panel">
+          <div class="filter-row">
+            <label for="sort">Sort</label>
+            <select id="sort" name="sort" class="filter-select">
+              {
+                availableSorts.map((opt) => (
+                  <option value={opt.value} selected={sort === opt.value}>
+                    {opt.label}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
+
+          {
+            availableCheckboxes.map((cb) => (
+              <label class="filter-checkbox">
+                <input
+                  type="checkbox"
+                  name={cb.name}
+                  value="1"
+                  checked={checkboxValues[cb.name]}
+                />
+                {cb.label}
+              </label>
+            ))
+          }
+
+          <div class="filter-actions">
+            <button type="submit" class="apply-button">Apply</button>
+            <a class="clear-filters" href={clearFiltersUrl}>Clear</a>
+          </div>
+        </div>
+      </details>
+
+      {
+        statusFilter && (
+          <input type="hidden" name="status" value={statusFilter} />
+        )
+      }
+      {
+        searchQuery && (
+          <a
+            href={clearSearchUrl}
+            class="clear-search"
+            title="Clear search"
+            aria-label="Clear search"
+          >
+            <MaskIcon
+              src={icons.mask("close")}
+              size="1.5em"
+              color="var(--text-secondary)"
+            />
+          </a>
+        )
+      }
+    </div>
+  </form>
+</div>
+
+<style>
+  .search-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+
+  .search-form {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--card-color);
+    border-radius: var(--radius-full);
+  }
+
+  .search-icon-wrapper {
+    display: flex;
+    align-items: center;
+    flex: none;
+  }
+
+  .search-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--text-primary);
+    font: inherit;
+    font-weight: var(--font-weight-semibold);
+
+    &::placeholder {
+      color: var(--paragraph-subtitle);
+      opacity: 0.6;
+    }
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .utils {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  .clear-search {
+    display: inline-flex;
+    padding: var(--space-2xs);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+
+    &:hover {
+      background: var(--card-hover-color);
+      text-decoration: none;
+    }
+  }
+
+  .filters {
+    position: relative;
+    display: inline-block;
+  }
+
+  .filters summary.filter-toggle {
+    list-style: none;
+    display: inline-flex;
+    padding: var(--space-2xs);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    user-select: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+    &:hover {
+      background: var(--card-hover-color);
+    }
+
+    &.has-active {
+      background: color-mix(in srgb, var(--monero-orange) 10%, transparent);
+    }
+
+    &.has-active .icon {
+      --iconColor: var(--monero-orange);
+    }
+  }
+
+  .filter-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + var(--space-md));
+    min-width: 220px;
+    padding: var(--space-md);
+    background: var(--card-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    z-index: var(--z-dropdown);
+    display: none;
+  }
+
+  .filters[open] .filter-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+
+    label {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+      color: var(--text-secondary);
+    }
+  }
+
+  .filter-select {
+    flex: 1;
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--card-hover-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+  }
+
+  .filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+
+    input {
+      accent-color: var(--monero-orange);
+    }
+  }
+
+  .filter-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-sm);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--border-color);
+  }
+
+  .apply-button {
+    padding: var(--space-xs) var(--space-md);
+    background: color-mix(in srgb, var(--monero-orange) 90%, black);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    font: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  .clear-filters {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+</style>
