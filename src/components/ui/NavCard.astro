@@ -1,0 +1,197 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { icons } from "@/utils/icons";
+
+import MaskIcon from "@/components/icons/MaskIcon.astro";
+
+type Variant = "idea" | "funding-required" | "work-in-progress" | "completed";
+
+/* Variant to text*/
+enum Vtot {
+  "idea" = "If you have an idea for a feature, task, or service, this is the place to pitch it for discussion.",
+  "funding-required" = "Once a pitched idea has been approved, it goes here for community fundraising.",
+  "work-in-progress" = "Approved ideas that have been picked up and successfully funded are moved here so their progress can be monitored.",
+  "completed" = "Once an item has been completed, all milestones met, and all funds paid out, the thread moves here."
+}
+
+/* Variant to title */
+enum VtoT {
+  "idea" = "Ideas",
+  "funding-required" = "Funding Required",
+  "work-in-progress" = "Work in Progress",
+  "completed" = "Completed"
+}
+
+/* Variant to icon */
+enum Vtoi {
+  "idea" = "lightbulb",
+  "funding-required" = "hand-coins",
+  "work-in-progress" = "cog",
+  "completed" = "package"
+}
+
+interface Props extends HTMLAttributes<"a"> {
+  variant: Variant;
+  class?: string;
+  target?: string;
+  rel?: string;
+}
+
+const {
+  variant,
+  class: className,
+  target,
+  rel,
+  ...rest
+}: Props = Astro.props;
+---
+
+<a
+  {target}
+  {rel}
+  class={className}
+  {...rest}
+  href=`/explorer?status=${variant}`
+>
+  <span class="icon">
+    <MaskIcon src={icons.mask(Vtoi[variant])} size="2.5em" />
+  </span>
+  <h3>{VtoT[variant]}</h3>
+  <p>
+    {Vtot[variant]}
+  </p>
+</a>
+
+<style>
+a {
+  background: var(--card-color);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  overflow: hidden;
+  position: relative;
+  text-decoration: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  & > h3 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    color: var(--heading-color);
+  }
+
+  & > p {
+    margin: 0;
+    color: var(--paragraph-subtitle);
+    line-height: var(--line-height-body);
+  }
+
+  & .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    padding: var(--space-lg);
+    background: var(--card-hover-color);
+    width: fit-content;
+    color: white;
+
+    transition: background 0.3s ease, color 0.3s ease, filter 0.3s ease;
+  }
+
+  &:hover {
+    background: var(--card-hover-color);
+    cursor: pointer;
+  }
+
+  &:nth-child(1) {
+    & .icon {
+      background: var(--status-idea-color);
+    }
+
+    &:hover .icon {
+      color: var(--status-idea-color);
+      filter: brightness(150%);
+      background: var(--card-hover-color);
+    }
+
+    &:hover { 
+      box-shadow: 4px 4px 6px var(--status-idea-color);
+    }
+  }
+
+  &:nth-child(2) {
+    & .icon {
+      background: var(--status-funding-color);
+    }
+
+    &:hover .icon {
+      color: var(--status-funding-color);
+      filter: brightness(150%);
+      background: var(--card-hover-color);
+    }
+
+    &:hover { 
+      box-shadow: -4px 4px 6px var(--status-funding-color);
+    }
+  }
+
+  &:nth-child(3) {
+    & .icon {
+      background: var(--status-wip-color);
+    }
+
+    &:hover .icon {
+      color: var(--status-wip-color);
+      filter: brightness(150%);
+      background: var(--card-hover-color); 
+    }
+
+    &:hover span div {
+      animation: 1s ease-in 0s infinite cog-rotate;
+      animation-timing-function: linear;
+    }
+
+    &:hover { 
+      box-shadow: 4px -4px 6px var(--status-wip-color);
+    } 
+  }
+
+  &:nth-child(4) {
+    & .icon {
+      background: var(--status-completed-color);
+    }
+
+    &:hover .icon {
+      color: var(--status-completed-color);
+      filter: brightness(150%);
+      background: var(--card-hover-color);
+    }
+
+    &:hover { 
+      box-shadow: -4px -4px 6px var(--status-completed-color);
+    }
+  }
+
+  @media (width > 900px) {
+    &:nth-child(1):hover {
+      transform: translate(-9px, -9px);
+    }
+
+    &:nth-child(2):hover {
+      transform: translate(9px, -9px);
+    }
+
+    &:nth-child(3):hover {
+      transform: translate(-9px, 9px);
+    }
+
+    &:nth-child(4):hover {
+      transform: translate(9px, 9px);
+    }
+  }
+}
+</style>

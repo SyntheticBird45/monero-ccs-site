@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import Button from "../components/ui/Button.astro";
 import MaskIcon from "@/components/icons/MaskIcon.astro";
+import NavCard from "@/components/ui/NavCard.astro";
 import { icons } from "@/utils/icons";
 ---
 
@@ -31,51 +32,14 @@ import { icons } from "@/utils/icons";
 
   <section data-variant="centered">
     <h2>View Proposals</h2>
-    <div class="explore-cards">
-      <a class="card" href="/explorer?status=idea">
-        <span class="icon">
-          <MaskIcon src={icons.mask("lightbulb")} size="2.5em" />
-        </span>
-        <h3>Ideas</h3>
-        <p>
-          If you have an idea for a feature, task, or service, this is the place
-          to pitch it for discussion.
-        </p>
-      </a>
-
-      <a class="card" href="/explorer?status=funding-required">
-        <span class="icon">
-          <MaskIcon src={icons.mask("hand-coins")} size="2.5em" />
-        </span>
-        <h3>Funding Required</h3>
-        <p>
-          Once a pitched idea has been approved, it goes here for community
-          fundraising.
-        </p>
-      </a>
-
-      <a class="card" href="/explorer?status=work-in-progress">
-        <span class="icon">
-          <MaskIcon src={icons.mask("cog")} size="2.5em" />
-        </span>
-        <h3>Work in Progress</h3>
-        <p>
-          Approved ideas that have been picked up and successfully funded are
-          moved here so their progress can be monitored.
-        </p>
-      </a>
-
-      <a class="card" href="/explorer?status=completed">
-        <span class="icon">
-          <MaskIcon src={icons.mask("package")} size="2.5em" />
-        </span>
-        <h3>Completed</h3>
-        <p>
-          Once an item has been completed, all milestones met, and all funds
-          paid out, the thread moves here.
-        </p>
-      </a>
-    </div>
+    <nav class="explore-cards">
+      <ul> 
+        <NavCard variant="idea" class="card"/>
+        <NavCard variant="funding-required" class="card"/>
+        <NavCard variant="work-in-progress" class="card"/>
+        <NavCard variant="completed" class="card"/>
+      </ul>
+    </nav>
   </section>
 </Layout>
 
@@ -125,88 +89,11 @@ import { icons } from "@/utils/icons";
     }
   }
 
-  .explore-cards {
+  .explore-cards ul {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 30em));
     justify-content: center;
     gap: var(--space-md);
-  }
-
-  .explore-cards .card {
-    background: var(--card-color);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
-    padding: var(--space-md);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-sm);
-    overflow: hidden;
-    position: relative;
-    text-decoration: none;
-    transition: transform 0.3s ease;
-
-    & > h3 {
-      margin: 0;
-      font-size: var(--font-size-lg);
-      color: var(--heading-color);
-    }
-
-    & > p {
-      margin: 0;
-      color: var(--paragraph-subtitle);
-      line-height: var(--line-height-body);
-    }
-
-    & .icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: var(--radius-full);
-      padding: var(--space-lg);
-      background: var(--card-hover-color);
-      width: fit-content;
-      color: white;
-    }
-
-    &:hover {
-      background: var(--card-hover-color);
-      cursor: pointer;
-    }
-
-    @media (width > 900px) {
-      &:nth-child(1):hover {
-        transform: translate(-5px, -5px);
-      }
-
-      &:nth-child(2):hover {
-        transform: translate(5px, -5px);
-      }
-
-      &:nth-child(3):hover {
-        transform: translate(-5px, 5px);
-      }
-
-      &:nth-child(4):hover {
-        transform: translate(5px, 5px);
-      }
-    }
-  }
-
-  .explore-cards .card:nth-child(1) .icon {
-    background: var(--status-idea-color);
-  }
-
-  .explore-cards .card:nth-child(2) .icon {
-    background: var(--status-funding-color);
-  }
-
-  .explore-cards .card:nth-child(3) .icon {
-    background: var(--status-wip-color);
-  }
-
-  .explore-cards .card:nth-child(4) .icon {
-    background: var(--status-completed-color);
   }
 
   @media (width <= 900px) {
