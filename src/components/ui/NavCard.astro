@@ -81,12 +81,16 @@ a {
     margin: 0;
     font-size: var(--font-size-lg);
     color: var(--heading-color);
+
+    transition: color 0.3s ease;
   }
 
   & > p {
     margin: 0;
     color: var(--paragraph-subtitle);
     line-height: var(--line-height-body);
+
+    transition: background 0.3s ease, color 0.3s ease, filter 0.3s ease;
   }
 
   & .icon {
@@ -107,6 +111,10 @@ a {
     cursor: pointer;
   }
 
+  &:hover p {
+    color: var(--paragraph-main);
+  }
+
   &:nth-child(1) {
     & .icon {
       background: var(--status-idea-color);
@@ -117,6 +125,10 @@ a {
       filter: brightness(150%);
       background: var(--card-hover-color);
     }
+
+    &:hover h3 {
+      color: var(--status-idea-color);
+    } 
 
     &:hover { 
       box-shadow: 4px 4px 6px var(--status-idea-color);
@@ -134,6 +146,10 @@ a {
       background: var(--card-hover-color);
     }
 
+    &:hover h3 {
+      color: var(--status-funding-color);
+    } 
+
     &:hover { 
       box-shadow: -4px 4px 6px var(--status-funding-color);
     }
@@ -150,8 +166,13 @@ a {
       background: var(--card-hover-color); 
     }
 
-    &:hover span div {
-      animation: 1s ease-in 0s infinite cog-rotate;
+    &:hover h3 {
+      color: var(--status-wip-color);
+    } 
+
+    &:hover span :global(div) {
+      scale: 1.25;
+      animation: 2s ease-in 0s infinite cog-rotate;
       animation-timing-function: linear;
     }
 
@@ -170,6 +191,10 @@ a {
       filter: brightness(150%);
       background: var(--card-hover-color);
     }
+
+    &:hover h3 {
+      color: var(--status-completed-color);
+    } 
 
     &:hover { 
       box-shadow: -4px -4px 6px var(--status-completed-color);
