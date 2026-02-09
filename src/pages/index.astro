@@ -127,11 +127,9 @@ import { icons } from "@/utils/icons";
 
   .explore-cards {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 30em));
+    justify-content: center;
     gap: var(--space-md);
-    align-items: stretch;
-    max-width: 75%;
-    margin: 0 auto;
   }
 
   .explore-cards .card {
@@ -214,7 +212,6 @@ import { icons } from "@/utils/icons";
   @media (width <= 900px) {
     .explore-cards {
       grid-template-columns: 1fr;
-      gap: var(--space-md);
     }
   }
 </style>
