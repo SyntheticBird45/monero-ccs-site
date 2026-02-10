@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
+    "@deno/astro-adapter": "^0.3.2",
     "@fontsource-variable/dm-sans": "^5.2.8",
     "astro": "^5.17.1",
+    "kysely": "^0.28.11",
+    "kysely-generic-sqlite": "^1.2.1",
     "typescript": "^5.9.3"
   }
 }

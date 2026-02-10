@@ -1,4 +1,6 @@
 ---
+export const prerender = false;
+
 import Layout from "../layouts/Layout.astro";
 import MaskIcon from "@/components/icons/MaskIcon.astro";
 import BackLink from "@/components/ui/BackLink.astro";
@@ -6,7 +8,8 @@ import { icons } from "@/utils/icons";
 import Button from "@/components/ui/Button.astro";
 import ProposalCard from "@/components/ProposalCard.astro";
 import ExplorerSearchBar from "@/components/ExplorerSearchBar.astro";
-import { sampleProposals } from "@/data/proposals";
+import { fetchIdeas } from "@/lib/gitlab";
+import { getDepositCounts, queryProposals } from "@/lib/proposals";
 import {
   checkboxFilters,
   DEFAULT_SORT,
@@ -32,24 +35,23 @@ const checkboxValues = normalizeCheckboxes(rawCheckboxValues, statusFilter);
 const hasActiveFilters = sort !== DEFAULT_SORT ||
   Object.values(checkboxValues).some(Boolean);
 
-// Sorting
-const sortStrategies: Record<string, (a: any, b: any) => number> = {
-  "newest": (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  "oldest": (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-  "most-funded": (a, b) => (b.amountFunded ?? 0) - (a.amountFunded ?? 0),
-  "least-funded": (a, b) => (a.amountFunded ?? 0) - (b.amountFunded ?? 0),
-};
+const isIdeaFilter = statusFilter === "idea";
+const [dbProposals, ideas] = await Promise.all([
+  isIdeaFilter ? [] : queryProposals({
+    status: statusFilter || undefined,
+    search: searchQuery || undefined,
+    sort,
+    notFullyFunded: checkboxValues.notFullyFunded || false,
+  }),
+  isIdeaFilter || !statusFilter
+    ? fetchIdeas({ search: searchQuery, sort })
+    : [],
+]);
+const depositCounts = dbProposals.length > 0
+  ? await getDepositCounts(dbProposals.map((p) => p.id))
+  : new Map<string, number>();
 
-// Filtered
-const proposals = sampleProposals
-  .filter((p) => {
-    const matchesSearch = p.title.toLowerCase().includes(searchQuery);
-    const matchesStatus = !statusFilter || p.status === statusFilter;
-    const matchesFunding = !checkboxValues.notFullyFunded ||
-      (p.amountFunded ?? 0) < (p.amount ?? 0);
-    return matchesSearch && matchesStatus && matchesFunding;
-  })
-  .sort(sortStrategies[sort] || (() => 0));
+const proposals = [...dbProposals, ...ideas];
 
 const categories = [
   {
@@ -141,7 +143,14 @@ const showIntro = !statusFilter && !searchQuery;
                 </p>
               )
             }
-            {proposals.map((proposal) => <ProposalCard {proposal} />)}
+            {
+              proposals.map((proposal) => (
+                <ProposalCard
+                  {proposal}
+                  contributionCount={depositCounts.get(proposal.id) || 0}
+                />
+              ))
+            }
           </>
         )
       }

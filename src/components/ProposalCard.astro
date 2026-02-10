@@ -1,11 +1,18 @@
 ---
-import type { Proposal } from "@/data/proposals";
+import type { Proposal } from "@/lib/proposals";
+import type { IdeaProposal } from "@/lib/gitlab";
+import picoToXmr from "@/utils/picoToXmr";
 
 interface Props {
-  proposal: Proposal;
+  proposal: Proposal | IdeaProposal;
+  contributionCount?: number;
 }
 
-const { proposal } = Astro.props;
+const { proposal, contributionCount = 0 } = Astro.props;
+const { data } = proposal;
+
+const amount = picoToXmr(data.targetAmount);
+const amountFunded = picoToXmr(data.raisedAmount);
 
 const statusConfig = {
   "idea": {
@@ -26,18 +33,13 @@ const statusConfig = {
   },
 } as const;
 
-const config = statusConfig[proposal.status];
-const fundingPercent = proposal.amount
-  ? Math.min(
-    Math.round(((proposal.amountFunded || 0) / proposal.amount) * 100),
-    100,
-  )
+const config = statusConfig[data.status];
+const fundingPercent = amount
+  ? Math.min(Math.round((amountFunded / amount) * 100), 100)
   : 0;
 
-function formatDate(d: string) {
-  const dt = new Date(d);
-  if (isNaN(dt.getTime())) return d;
-  return dt.toLocaleDateString("en-US", {
+function formatDate(d: Date) {
+  return d.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -49,12 +51,14 @@ import { icons } from "@/utils/icons";
 ---
 
 <a
-  href={proposal.url}
+  href={data.status === "idea" && data.gitlabUrl
+    ? data.gitlabUrl
+    : `/items/${proposal.id}`}
   class="proposal-card"
   style={`--progress-color: ${config.borderColor}`}
 >
   <div class="proposal-content">
-    <h3 class="proposal-title">{proposal.title}</h3>
+    <h3 class="proposal-title">{data.title}</h3>
 
     <div class="proposal-meta">
       <div class="meta-item">
@@ -63,7 +67,7 @@ import { icons } from "@/utils/icons";
           size="1.25em"
           color="var(--monero-orange)"
         />
-        <span>{proposal.author}</span>
+        <span>{data.author}</span>
       </div>
       <div class="meta-item">
         <MaskIcon
@@ -71,39 +75,40 @@ import { icons } from "@/utils/icons";
           size="1.25em"
           color="var(--monero-orange)"
         />
-        <span>{formatDate(proposal.date)}</span>
+        <span>{formatDate(data.date)}</span>
       </div>
       {
-        proposal.contributions !== undefined && (
+        contributionCount > 0 && (
           <div class="meta-item">
             <MaskIcon
               src={icons.mask("users")}
               size="1.25em"
               color="var(--monero-orange)"
             />
-            <span>{proposal.contributions} contributors</span>
+            <span>{contributionCount} contributors</span>
           </div>
         )
       }
       {
-        proposal.amount !== undefined && (
+        amount > 0 && (
           <div class="meta-item">
             <MaskIcon
               src={icons.mask("coins")}
               size="1.25em"
               color="var(--monero-orange)"
             />
-            <span>{proposal.amount} XMR</span>
+            <span>{amount} XMR</span>
           </div>
         )
       }
     </div>
 
     {
-      proposal.status === "funding-required" && (
+      data.status === "funding-required" && (
         <div class="proposal-progress">
-          <span class="progress-text"
-          >Raised {proposal.amountFunded || 0} of {proposal.amount} XMR</span>
+          <span class="progress-text">
+            Raised {amountFunded} of {amount} XMR
+          </span>
           <div class="progress-track">
             <div class="progress-fill" style={`width: ${fundingPercent}%`}>
             </div>
@@ -113,22 +118,22 @@ import { icons } from "@/utils/icons";
     }
 
     {
-      proposal.status === "work-in-progress" && proposal.milestones &&
+      data.status === "work-in-progress" && data.milestones &&
   (
         <div class="proposal-progress">
-          <span class="progress-text"
-          >Completed {proposal.milestonesCompleted || 0} of {
-              proposal.milestones
-            } milestones</span>
+          <span class="progress-text">
+            Completed {data.milestonesCompleted || 0} of {data.milestones}{" "}
+            milestones
+          </span>
           <div class="milestone-grid">
             {
-              Array.from({ length: proposal.milestones }).map((
+              Array.from({ length: data.milestones }).map((
                 _,
                 i,
               ) => (
                 <div
                   class={`milestone-seg ${
-                    i < (proposal.milestonesCompleted || 0) ? "active" : ""
+                    i < (data.milestonesCompleted || 0) ? "active" : ""
                   }`}
                 />
               ))
