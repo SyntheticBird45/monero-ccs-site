@@ -77,8 +77,6 @@ const categories = [
     label: "Completed",
   },
 ];
-
-const showIntro = !statusFilter && !searchQuery;
 ---
 
 <Layout>
@@ -119,31 +117,17 @@ const showIntro = !statusFilter && !searchQuery;
       />
 
       {
-        showIntro ? (
-          <div class="info-message">
-            <div class="info-image-placeholder">
-              <MaskIcon
-                src={icons.mask("search")}
-                size="3rem"
-                color="var(--monero-orange)"
-              />
-            </div>
-            <p>Select a category, or search by name to get started.</p>
-          </div>
-        ) : (
-          <>
-            {
-              searchQuery && (
-                <p class="search-results">
-                  Found {proposals.length} proposal{
-                    proposals.length !== 1 ? "s" : ""
-                  } matching "{searchQuery}"
-                </p>
-              )
-            }
-            {proposals.map((proposal) => <ProposalCard {proposal} />)}
-          </>
+        searchQuery && (
+          <p class="search-results">
+            Found {proposals.length} proposal{proposals.length !== 1 ? "s" : ""}
+            matching "{searchQuery}"
+          </p>
         )
+      }
+      {
+        proposals.map((proposal) => (
+          <ProposalCard {proposal} showStatusLabel={!statusFilter} />
+        ))
       }
     </div>
   </div>
@@ -210,33 +194,6 @@ const showIntro = !statusFilter && !searchQuery;
     font-size: var(--font-size-sm);
     color: var(--text-secondary);
     font-weight: var(--font-weight-medium);
-  }
-
-  .info-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: var(--space-4xl) var(--space-xl);
-    color: var(--text-secondary);
-  }
-
-  .info-image-placeholder {
-    width: 120px;
-    height: 120px;
-    background: var(--card-hover-color);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--space-lg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .info-message p {
-    margin: 0;
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-medium);
-    max-width: 400px;
   }
 
   @media (width >= 1200px) {

@@ -3,26 +3,31 @@ import type { Proposal } from "@/data/proposals";
 
 interface Props {
   proposal: Proposal;
+  showStatusLabel?: boolean;
 }
 
-const { proposal } = Astro.props;
+const { proposal, showStatusLabel = false } = Astro.props;
 
 const statusConfig = {
   "idea": {
     borderColor: "var(--status-idea-color)",
     icon: "lightbulb",
+    label: "Idea",
   },
   "funding-required": {
     borderColor: "var(--status-funding-color)",
     icon: "hand-coins",
+    label: "Funding Required",
   },
   "work-in-progress": {
     borderColor: "var(--status-wip-color)",
     icon: "cog",
+    label: "Work in Progress",
   },
   "completed": {
     borderColor: "var(--status-completed-color)",
     icon: "package",
+    label: "Completed",
   },
 } as const;
 
@@ -53,6 +58,14 @@ import { icons } from "@/utils/icons";
   class="proposal-card"
   style={`--progress-color: ${config.borderColor}`}
 >
+  {
+    showStatusLabel && (
+      <span class="status-label">
+        <MaskIcon src={icons.mask(config.icon)} size="1em" />
+        {config.label}
+      </span>
+    )
+  }
   <div class="proposal-content">
     <h3 class="proposal-title">{proposal.title}</h3>
 
@@ -143,6 +156,7 @@ import { icons } from "@/utils/icons";
 <style>
   .proposal-card {
     display: block;
+    position: relative;
     background: var(--card-color);
     border-radius: 0 0 var(--radius-md) var(--radius-md);
     box-shadow: var(--shadow-sm);
@@ -157,6 +171,21 @@ import { icons } from "@/utils/icons";
   .proposal-card:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
+  }
+
+  .status-label {
+    position: absolute;
+    top: -1px;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+    padding: 0.3em 0.7em;
+    background: var(--progress-color);
+    color: white;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   }
 
   .proposal-title {

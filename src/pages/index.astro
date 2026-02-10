@@ -3,6 +3,9 @@ import Layout from "../layouts/Layout.astro";
 import Button from "../components/ui/Button.astro";
 import MaskIcon from "@/components/icons/MaskIcon.astro";
 import { icons } from "@/utils/icons";
+
+import landingImage from "../assets/funding-required.png";
+import { Image } from "astro:assets";
 ---
 
 <Layout>
@@ -22,10 +25,7 @@ import { icons } from "@/utils/icons";
       </div>
     </div>
     <div class="image">
-      <img
-        src="/assets/hero-image.avif"
-        alt="Some pretty img here"
-      />
+      <Image src={landingImage} alt="" />
     </div>
   </div>
 
