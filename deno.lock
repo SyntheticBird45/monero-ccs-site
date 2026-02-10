@@ -1,6 +1,7 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@kysely/kysely@~0.28.11": "0.28.11",
     "jsr:@std/yaml@*": "1.0.11",
     "npm:@astrojs/check@~0.9.6": "0.9.6_typescript@5.9.3",
     "npm:@deno/astro-adapter@~0.3.2": "0.3.2_astro@5.17.1__typescript@5.9.3__vite@6.4.1___picomatch@4.0.3__zod@3.25.76_typescript@5.9.3",
@@ -11,6 +12,9 @@
     "npm:typescript@^5.9.3": "5.9.3"
   },
   "jsr": {
+    "@kysely/kysely@0.28.11": {
+      "integrity": "e7b2e545155098a20dda6728b06ffac933f2d342bca46ede9cd8cd89accdcc9e"
+    },
     "@std/yaml@1.0.11": {
       "integrity": "bd139ce77f2d06cbed3713c8b26d301d2a2e12ecc7986130a268107e212143ee"
     }
@@ -2686,7 +2690,7 @@
   },
   "workspace": {
     "dependencies": [
-      "npm:kysely@~0.28.11"
+      "jsr:@kysely/kysely@~0.28.11"
     ],
     "packageJson": {
       "dependencies": [

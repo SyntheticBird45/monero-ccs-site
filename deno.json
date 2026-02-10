@@ -13,6 +13,6 @@
     "useTabs": false
   },
   "imports": {
-    "kysely": "npm:kysely@^0.28.11"
+    "kysely": "jsr:@kysely/kysely@^0.28.11"
   }
 }
