@@ -82,15 +82,16 @@ a {
     font-size: var(--font-size-lg);
     color: var(--heading-color);
 
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, transform 0.3s 0.3s ease;
   }
 
   & > p {
+    top: 0;
     margin: 0;
     color: var(--paragraph-subtitle);
     line-height: var(--line-height-body);
 
-    transition: background 0.3s ease, color 0.3s ease, filter 0.3s ease;
+    transition: color 0.3s ease, transform 0.3s 0.4s ease;
   }
 
   & .icon {
@@ -99,21 +100,39 @@ a {
     justify-content: center;
     border-radius: var(--radius-full);
     padding: var(--space-lg);
+    margin: calc(var(--space-xl) - var(--space-lg));
     background: var(--card-hover-color);
+    overflow: hidden;
     width: fit-content;
     color: white;
 
-    transition: background 0.3s ease, color 0.3s ease, filter 0.3s ease;
+    transition: background 0.3s ease, color 0.3s ease, filter 0.3s ease, margin 0.6s 0s ease, padding 0.6s 0s ease;
   }
+
+  /* shared hover transitions */
 
   &:hover {
     background: var(--card-hover-color);
     cursor: pointer;
   }
 
+  &:hover h3 {
+      transform: scale(1.125) translateY(4px);
+  }
+
   &:hover p {
     color: var(--paragraph-main);
+    transform: translateY(9px);
   }
+
+  &:hover .icon {
+    padding: var(--space-xl);
+    margin: 0;
+    filter: brightness(150%);
+    background: var(--card-hover-color); 
+  }
+
+  /* Category specific cards */
 
   &:nth-child(1) {
     & .icon {
@@ -122,7 +141,6 @@ a {
 
     &:hover .icon {
       color: var(--status-idea-color);
-      filter: brightness(150%);
       background: var(--card-hover-color);
     }
 
@@ -142,7 +160,6 @@ a {
 
     &:hover .icon {
       color: var(--status-funding-color);
-      filter: brightness(150%);
       background: var(--card-hover-color);
     }
 
@@ -162,17 +179,17 @@ a {
 
     &:hover .icon {
       color: var(--status-wip-color);
-      filter: brightness(150%);
       background: var(--card-hover-color); 
     }
 
     &:hover h3 {
       color: var(--status-wip-color);
-    } 
+      /* color: color-mix(in srgb, var(--status-wip-color), white 20%); */
+    }
 
     &:hover span :global(div) {
-      scale: 1.25;
-      animation: 2s ease-in 0s infinite cog-rotate;
+      scale: 1.325;
+      animation: 2s ease-in 0.6s infinite cog-rotate;
       animation-timing-function: linear;
     }
 
@@ -188,13 +205,17 @@ a {
 
     &:hover .icon {
       color: var(--status-completed-color);
-      filter: brightness(150%);
       background: var(--card-hover-color);
     }
 
     &:hover h3 {
       color: var(--status-completed-color);
-    } 
+    }
+
+    &:hover span :global(div) {
+      animation: 5s ease-in 0.6s infinite navcard-completed-icon;
+      animation-timing-function: linear;
+    }
 
     &:hover { 
       box-shadow: -4px -4px 6px var(--status-completed-color);
