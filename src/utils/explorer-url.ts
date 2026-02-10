@@ -1,4 +1,8 @@
-import type { ProposalStatus } from "../data/proposals.ts";
+export type ProposalStatus =
+  | "idea"
+  | "funding-required"
+  | "work-in-progress"
+  | "completed";
 
 export interface SortOption {
   value: string;
