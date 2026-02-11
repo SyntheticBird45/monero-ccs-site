@@ -1,8 +1,22 @@
 import db from "@/db/index.ts";
-import type { Database, ProposalTable } from "@/db/schema.ts";
-import type { Selectable, SelectQueryBuilder } from "kysely";
+import {
+  deposits,
+  type Proposal as ProposalRow,
+  proposals,
+} from "@/db/schema.ts";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  inArray,
+  like,
+  lt,
+  type SQL,
+} from "drizzle-orm";
 
-export type Proposal = ReturnType<typeof toProposal>;
+export type ProposalView = ReturnType<typeof toProposalView>;
 
 export interface ProposalQuery {
   status?: string;
@@ -13,69 +27,76 @@ export interface ProposalQuery {
   offset?: number;
 }
 
-const VALID_STATUSES = new Set([
-  "funding-required",
-  "work-in-progress",
-  "completed",
-]);
+function collectFilters(query: ProposalQuery): SQL[] {
+  const conditions: SQL[] = [];
 
-function withProposalFilters<O>(
-  qb: SelectQueryBuilder<Database, "proposals", O>,
-  query: ProposalQuery,
-) {
-  if (query.status && VALID_STATUSES.has(query.status)) {
-    qb = qb.where("status", "=", query.status as ProposalTable["status"]);
+  if (
+    query.status &&
+    (proposals.status.enumValues as string[]).includes(query.status)
+  ) {
+    conditions.push(
+      eq(proposals.status, query.status as ProposalRow["status"]),
+    );
   }
 
   if (query.search) {
-    qb = qb.where("title", "like", `%${query.search}%`);
+    conditions.push(like(proposals.title, `%${query.search}%`));
   }
 
   if (query.notFullyFunded) {
-    qb = qb.whereRef("raised_amount", "<", "target_amount");
+    conditions.push(lt(proposals.raised_amount, proposals.target_amount));
   }
 
-  return qb;
+  return conditions;
 }
 
-export async function queryProposals(query: ProposalQuery = {}) {
+export function queryProposals(query: ProposalQuery = {}) {
   const [col, dir] = parseSortParams(query.sort || "newest");
+  const orderFn = dir === "asc" ? asc : desc;
+  const conditions = collectFilters(query);
 
-  let qb = db.selectFrom("proposals").selectAll();
+  let qb = db
+    .select()
+    .from(proposals)
+    .where(conditions.length ? and(...conditions) : undefined)
+    .orderBy(orderFn(proposals[col]))
+    .$dynamic();
 
-  qb = withProposalFilters(qb, query);
+  if (query.limit) {
+    qb = qb.limit(query.limit).offset(query.offset || 0);
+  }
 
-  const rows = await qb
-    .orderBy(col, dir)
-    .$if(!!query.limit, (q) => q.limit(query.limit!).offset(query.offset || 0))
-    .execute();
-
-  return rows.map(toProposal);
+  return qb.all().map(toProposalView);
 }
 
-export async function countProposals(query: ProposalQuery = {}) {
-  let qb = db.selectFrom("proposals")
-    .select((eb) => eb.fn.countAll<number>().as("count"));
+export function countProposals(query: ProposalQuery = {}) {
+  const conditions = collectFilters(query);
 
-  qb = withProposalFilters(qb, query);
+  const result = db
+    .select({ count: count() })
+    .from(proposals)
+    .where(conditions.length ? and(...conditions) : undefined)
+    .get();
 
-  const result = await qb.executeTakeFirstOrThrow();
-  return result.count;
+  return result?.count ?? 0;
 }
 
-export async function getDepositCounts(
+export function getDepositCounts(
   proposalIds?: string[],
-): Promise<Map<string, number>> {
-  const rows = await db
-    .selectFrom("deposits")
-    .select(["proposal_id", (eb) => eb.fn.countAll<number>().as("count")])
-    .$if(
-      !!proposalIds?.length,
-      (qb) => qb.where("proposal_id", "in", proposalIds!),
-    )
-    .groupBy("proposal_id")
-    .execute();
+): Map<string, number> {
+  let qb = db
+    .select({
+      proposal_id: deposits.proposal_id,
+      count: count(),
+    })
+    .from(deposits)
+    .$dynamic();
 
+  if (proposalIds?.length) {
+    qb = qb.where(inArray(deposits.proposal_id, proposalIds));
+  }
+
+  const rows = qb.groupBy(deposits.proposal_id).all();
   return new Map(rows.map((r) => [r.proposal_id, r.count]));
 }
 
@@ -94,7 +115,7 @@ function parseSortParams(
   }
 }
 
-function toProposal(row: Selectable<ProposalTable>) {
+function toProposalView(row: ProposalRow) {
   return {
     id: row.id,
     data: {

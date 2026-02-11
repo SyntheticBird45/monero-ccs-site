@@ -1,10 +1,10 @@
 ---
-import type { Proposal } from "@/lib/proposals";
-import type { IdeaProposal } from "@/lib/gitlab";
+import type { ProposalView } from "@/lib/proposals.ts";
+import type { IdeaProposal } from "@/lib/gitlab-ideas.ts";
 import picoToXmr from "@/utils/picoToXmr";
 
 interface Props {
-  proposal: Proposal | IdeaProposal;
+  proposal: ProposalView | IdeaProposal;
   contributionCount?: number;
 }
 
